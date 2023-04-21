@@ -3,11 +3,15 @@
 namespace Lquintana\Sendinblue;
 
 use GuzzleHttp\Client;
+use SendinBlue\Client\ApiException;
 use SendinBlue\Client\Configuration;
 use SendinBlue\Client\Api\AccountApi;
 use SendinBlue\Client\Api\SendersApi;
 use SendinBlue\Client\Api\ContactsApi;
+use SendinBlue\Client\Model\CreateContact;
+use SendinBlue\Client\Model\UpdateContact;
 use SendinBlue\Client\Api\EmailCampaignsApi;
+use SendinBlue\Client\Model\AddContactToList;
 
 class Sendinblue
 {
@@ -45,14 +49,18 @@ class Sendinblue
 	 */
 	public function __call($method, array $args)
 	{
-		//Calling endpoint if exist
-		if(method_exists($this->apiInstance, $method))
-		{
-			return call_user_func_array(array($this->apiInstance, $method), $args);
-		}
+		try {
+			//Calling endpoint if exist
+			if(method_exists($this->apiInstance, $method))
+			{
+				return call_user_func_array(array($this->apiInstance, $method), $args);
+			}
 
-		//Or treat it as a property
-		return $this->apiInstance->{$method};
+			//Or treat it as a property
+			return $this->apiInstance->{$method};
+		} catch (ApiException $e) {
+			return $e;
+		}
 	}
 
 	/**
@@ -92,5 +100,43 @@ class Sendinblue
 			$this->config
 		);
 		return $this;
+	}
+
+	public function updateOrCreate(string $email, array $contact, array $lists = [])
+	{
+		$createContact = new CreateContact([
+            'email' => $email,
+			'updateEnabled' => true,
+			'attributes' => (object) $contact, 
+			'listIds' => $lists,
+       ]);
+		try {
+			$this->apiInstance->createContact($createContact);
+		} catch (ApiException $e) {
+			return $e;
+		}
+	}
+
+	public function addToList(int $listId, array $emails)
+	{
+		$contactIdentifiers = new AddContactToList();
+		$contactIdentifiers['emails'] = $emails;
+		try {
+			$this->apiInstance->addContactToList($listId, $contactIdentifiers);
+		} catch (ApiException $e) {
+			return $e;
+		}
+	}
+
+	public function update($identifier, $contactDetails)
+	{
+		$updateContact = new UpdateContact();
+		$updateContact['attributes'] = $contactDetails;
+
+		try {
+			$this->apiInstance->updateContact($identifier, $updateContact);
+		} catch (ApiException $e) {
+			return $e;
+		}
 	}
 }
