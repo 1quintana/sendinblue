@@ -12,6 +12,7 @@ use SendinBlue\Client\Model\CreateContact;
 use SendinBlue\Client\Model\UpdateContact;
 use SendinBlue\Client\Api\EmailCampaignsApi;
 use SendinBlue\Client\Model\AddContactToList;
+use SendinBlue\Client\Model\RemoveContactFromList;
 
 class Sendinblue
 {
@@ -123,6 +124,17 @@ class Sendinblue
 		$contactIdentifiers['emails'] = $emails;
 		try {
 			$this->apiInstance->addContactToList($listId, $contactIdentifiers);
+		} catch (ApiException $e) {
+			return $e;
+		}
+	}
+
+	public function removeFromList(int $listId, array $emails)
+	{
+		$contactIdentifiers = new RemoveContactFromList();
+		$contactIdentifiers['emails'] = $emails;
+		try {
+			$this->apiInstance->removeContactFromList($listId, $contactIdentifiers);
 		} catch (ApiException $e) {
 			return $e;
 		}
